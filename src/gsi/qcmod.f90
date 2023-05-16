@@ -4469,62 +4469,63 @@ subroutine qc_geocsr(nchanl,is,ndat,nsig,ich,sea,land,ice,snow,luse,   &
      end if
 
   end do
-  if ( lcloud > 0 ) then  ! If cloud detected, reject channels affected by it.
-     do i=1,nchanl
-
-!       reject channels with iuse_rad(j)=-1 when they are peaking below the cloud
-        j=ich(i)
-        if (passive_bc .and. iuse_rad(j)==-1) then
-           if (lcloud >= kmax(i)) then
-              if(luse)aivals(11,is)   = aivals(11,is) + one
-              varinv(i) = zero
-              varinv_use(i) = zero
-              if(id_qc(i) == igood_qc)id_qc(i)=ifail_cloud_qc
-              cycle
-           end if
-        end if
-
-!       If more than 2% of the transmittance comes from the cloud layer,
-!          reject the channel (0.02 is a tunable parameter)
-
-        delta = 0.02_r_kind
-        if ( ptau5(lcloud,i) > 0.02_r_kind) then
-!          QC4 in statsrad
-           if(luse)aivals(11,is)   = aivals(11,is) + one
-           varinv(i) = zero
-           varinv_use(i) = zero
-           if(id_qc(i) == igood_qc)id_qc(i)=ifail_cloud_qc
-        end if
-     end do
-
-!    If no clouds check surface temperature/emissivity
-  else                 ! If no cloud was detected, do surface temp/emiss checks
-     sum=zero
-     sum2=zero
-     do i=1,nchanl
-        sum=sum+tbc(i)*ts(i)*varinv_use(i)
-        sum2=sum2+ts(i)*ts(i)*varinv_use(i)
-     end do
-     if (abs(sum2) < tiny_r_kind) sum2 = sign(tiny_r_kind,sum2)
-     dts=abs(sum/sum2)
-     if(abs(dts) > one)then
-        if(.not. sea)then
-           dts=min(dtempf,dts)
-        else
-           dts=min(three,dts)
-        end if
-        do i=1,nchanl
-           delta=max(r0_05*tnoise(i),r0_02)
-           if(abs(dts*ts(i)) > delta)then
-!             QC3 in statsrad
-              if(luse .and. varinv(i) > zero) &
-                 aivals(10,is)   = aivals(10,is) + one
-              varinv(i) = zero
-              if(id_qc(i) == igood_qc)id_qc(i)=ifail_sfcir_qc
-           end if
-        end do
-     end if
-  endif
+!XL commented below [LCS]
+!  if ( lcloud > 0 ) then  ! If cloud detected, reject channels affected by it. 
+!     do i=1,nchanl
+!
+!!       reject channels with iuse_rad(j)=-1 when they are peaking below the cloud
+!        j=ich(i)
+!        if (passive_bc .and. iuse_rad(j)==-1) then
+!           if (lcloud >= kmax(i)) then
+!              if(luse)aivals(11,is)   = aivals(11,is) + one
+!              varinv(i) = zero
+!              varinv_use(i) = zero
+!              if(id_qc(i) == igood_qc)id_qc(i)=ifail_cloud_qc
+!              cycle
+!           end if
+!        end if
+!
+!!       If more than 2% of the transmittance comes from the cloud layer,
+!!          reject the channel (0.02 is a tunable parameter)
+!
+!        delta = 0.02_r_kind
+!        if ( ptau5(lcloud,i) > 0.02_r_kind) then
+!!          QC4 in statsrad
+!           if(luse)aivals(11,is)   = aivals(11,is) + one
+!           varinv(i) = zero
+!           varinv_use(i) = zero
+!           if(id_qc(i) == igood_qc)id_qc(i)=ifail_cloud_qc
+!        end if
+!     end do
+!
+!!    If no clouds check surface temperature/emissivity
+!  else                 ! If no cloud was detected, do surface temp/emiss checks
+!     sum=zero
+!     sum2=zero
+!     do i=1,nchanl
+!        sum=sum+tbc(i)*ts(i)*varinv_use(i)
+!        sum2=sum2+ts(i)*ts(i)*varinv_use(i)
+!     end do
+!     if (abs(sum2) < tiny_r_kind) sum2 = sign(tiny_r_kind,sum2)
+!     dts=abs(sum/sum2)
+!     if(abs(dts) > one)then
+!        if(.not. sea)then
+!           dts=min(dtempf,dts)
+!        else
+!           dts=min(three,dts)
+!        end if
+!        do i=1,nchanl
+!           delta=max(r0_05*tnoise(i),r0_02)
+!           if(abs(dts*ts(i)) > delta)then
+!!             QC3 in statsrad
+!              if(luse .and. varinv(i) > zero) &
+!                 aivals(10,is)   = aivals(10,is) + one
+!              varinv(i) = zero
+!              if(id_qc(i) == igood_qc)id_qc(i)=ifail_sfcir_qc
+!           end if
+!        end do
+!     end if
+!  endif
 
   do i = 1, nchanl
 
